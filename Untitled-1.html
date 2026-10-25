@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halloween</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #exit-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10;
+        }
+
+        #exit-button {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: transparent;
+            color: white;
+            font: 34px Arial, sans-serif;
+            cursor: pointer;
+        }
+
+        #exit-button:hover {
+            background: #222;
+        }
+
+        #scare {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            filter: invert(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="exit-screen">
+        <button id="exit-button" type="button" aria-label="나가기">×</button>
+    </div>
+
+    <img id="scare" src="./Smile.jeff.jpg" alt="">
+
+    <audio
+        id="sound"
+        src="./scare.mp3"
+        preload="auto"
+        loop>
+    </audio>
+
+    <script>
+        const image = document.getElementById("scare");
+        const sound = document.getElementById("sound");
+        const exitScreen = document.getElementById("exit-screen");
+        const exitButton = document.getElementById("exit-button");
+
+        let soundStarted = false;
+        let inverted = false;
+
+        // X 버튼을 누르면 소리 재생과 이미지 표시 시작
+        async function startScare() {
+            if (soundStarted) return;
+
+            // 사용자 클릭 이벤트 안에서 재생을 요청
+            const playPromise = sound.play();
+
+            soundStarted = true;
+            exitScreen.style.display = "none";
+            image.style.display = "block";
+
+            try {
+                await playPromise;
+                console.log("[Audio] 재생 성공");
+            } catch (error) {
+                soundStarted = false;
+                console.error(
+                    "[Audio] 재생 실패:",
+                    error.name,
+                    error.message
+                );
+            }
+        }
+
+        exitButton.addEventListener("click", startScare);
+
+        // 이미지 색상을 0.01초마다 반전
+        setInterval(() => {
+            if (image.style.display !== "block") return;
+
+            inverted = !inverted;
+            image.style.filter = inverted
+                ? "invert(1)"
+                : "invert(0)";
+        }, 45);
+
+        // 오디오 로딩 및 오류 확인
+        sound.addEventListener("canplay", () => {
+            console.log("[Audio] 파일 로드 완료");
+        });
+
+        sound.addEventListener("error", () => {
+            console.error("[Audio] 파일 로드 실패:", sound.error);
+        });
+    </script>
+</body>
+</html>
